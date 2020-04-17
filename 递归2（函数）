@@ -1,0 +1,50 @@
+int i=0;
+int Length( List L )
+{
+    if(L==NULL) return i;
+    else i++; return Length(L->Next);
+}
+//求链式表的表长
+
+
+void printListFromTail2Head(LinkNode* head)
+{
+    if(head!=NULL){
+        printListFromTail2Head(head->next);
+        printf("%d ",head->data);
+    }
+}
+// 从尾到头输出单链表
+
+
+struct ListNode *readlist()
+{
+    struct ListNode*L,*p,*s;
+    L=(struct ListNode*)malloc(sizeof(struct ListNode));
+    L->next=NULL;
+    p=L;
+    int n;
+    scanf("%d",&n);
+    while(n!=-1){
+        s=(struct ListNode*)malloc(sizeof(struct ListNode));
+        s->data=n;
+        p->next=s;
+        p=s;
+        scanf("%d",&n);
+    }
+    p->next=NULL;
+    return L;
+}
+struct ListNode *deletem( struct ListNode *L, int m )
+{
+    if(L->next!=NULL){
+        L->next->next=deletem (L->next,m);
+        if(L->next->data==m){
+            struct ListNode*p=L->next;
+            L->next=L->next->next;
+            free(p);
+        }
+    }
+    return L->next;
+}
+// 单链表结点删除 
