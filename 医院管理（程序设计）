@@ -1,0 +1,734 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+struct keshi_node {
+	int knum;
+	char kname[10];
+	long kdian;
+	char city[10];
+	char yiyuan[20];
+	char lou[10];
+	char khao[10];
+	struct bingren_node* nextbingren;
+	struct keshi_node* next;
+};//科室的结构；
+struct bingren_node {
+	int bnum;
+	char bname[10];
+	double bdian;
+	int knum;
+	char city[10];
+	char street[20];
+	char code[100];
+	struct bingren_node* next;
+	struct jiuzhen_node* nextjiuzhen;
+};//病人的结构；
+struct jiuzhen_node {
+	int bnum;
+	char bname[10];
+	char shijian[20];
+	int knum;
+	char zg[100];
+	char as[100];
+	struct jiuzhen_node* next;
+};//就诊记录的结构；
+struct keshi_node* duqu() {//从文件中读取数据连成单个链表再将单个链表连成一个多重链表；
+	FILE* fp, * fp1, * fp2;
+	struct keshi_node* p, * tail, * head;
+	struct bingren_node* p1, * tail1, * head1, * d1;
+	struct jiuzhen_node* p2, * tail2, * head2, * d2;
+	int knum;
+	int bnum;
+	int bnum1;
+	fp = fopen("keshi_node.txt", "r");
+	if (fp == NULL) {
+		printf("打开《keshi_node.txt》错误!\n");
+	}
+	else {
+		head = tail = NULL;
+		while (1) {
+			fscanf(fp, "%d", &knum);
+			if (knum==-1)break;
+			p = (struct keshi_node*)malloc(sizeof(struct keshi_node));
+			p->knum = knum;
+			fscanf(fp, "%s %ld %s %s %s %s", p->kname, &p->kdian, p->city, p->yiyuan, p->lou, p->khao);
+			if (head == NULL)head = p;
+			if (tail != NULL)tail->next = p;
+			tail = p;
+			tail->next = NULL;
+		}
+	}
+	fp1 = fopen("bingren_node.txt", "r");
+	if (fp1 == NULL) {
+		printf("打开《bingren_node.txt》错误!\n");
+	}
+	else {
+		head1 = tail1 = NULL;
+		while (1) {
+			fscanf(fp1,"%d", &bnum);
+			if (bnum == -1)break;
+			p1 = (struct bingren_node*)malloc(sizeof(struct bingren_node));
+			p1->bnum = bnum;
+			fscanf(fp1, "%s %lf %d %s %s %s", p1->bname, &p1->bdian, &p1->knum, p1->city, p1->street, p1->code);
+			if (head1 == NULL)head1 = p1;
+			if (tail1 != NULL)tail1->next = p1;
+			tail1 = p1;
+			tail1->next = NULL;
+		}
+	}
+	fp2 = fopen("jiuzhen_node.txt", "r");
+	if (fp2 == NULL) {
+		printf("打开《jiuzhen_node.tex》错误!\n");
+	}
+	else {
+		head2 = tail2 = NULL;
+		while (1) {
+			fscanf(fp2,"%d", &bnum1);
+			if (bnum1 == -1) break;
+			p2 = (struct jiuzhen_node*)malloc(sizeof(struct jiuzhen_node));
+			p2->bnum = bnum1;
+			fscanf(fp2, "%s %d %s %s %s", p2->bname, &p2->knum, p2->shijian, p2->zg, p2->as);
+			if (head2 == NULL)head2 = p2;
+			if (tail2 != NULL)tail2->next = p2;
+			tail2 = p2;
+			tail2->next = NULL;
+		}
+	}
+	int flag1 = 1, n = 0, n1 = 0, flag2 = 1;
+	p2 = head2;
+	while (p2!=NULL) {
+		for (p1 = head1; p1; p1 = p1->next) {
+			if (p1->bnum == p2->bnum && p1->knum == p2->knum) {
+				p1->nextjiuzhen = p2;
+				while (p2->next && p2->bnum == p2->next->bnum) {
+					p2 = p2->next;
+				}
+				d2 = p2;
+				if (p2->next)p2 = p2->next;
+				else n = 1;
+				d2->next = NULL;
+				flag1 = 0;
+				break;
+			}
+		}
+		if (n)break;
+		if (flag1)p2 = p2->next;
+		else flag1 = 1;
+	}
+	p1 = head1;
+	while(p1!=NULL) {
+		for (p = head; p; p = p->next) {
+			if (p->knum == p1->knum) {
+				p->nextbingren = p1;
+				while (p1->next && p1->knum == p1->next->knum) {
+					p1 = p1->next;
+				}
+				d1 = p1;
+				if (p1->next)p1 = p1->next;
+				else n1 = 1;
+				d1->next = NULL;
+				flag2 = 0;
+				break;
+			}
+		}
+		if (n1)break;
+		if (flag2)p1 = p1->next;
+		else flag2 = 1;
+	}
+	return head;
+}
+void menu(struct keshi_node* head);//主菜单函数；
+void xuanzhe(struct keshi_node* head);//菜单选择函数；
+void jiben(struct keshi_node* head);//基本就诊记录功能的菜单及选择函数；
+void chaxun(struct keshi_node* head);//查询功能的菜单及选择函数；
+void chak(struct keshi_node* head);//查询科室信息的函数；
+void chab(struct keshi_node* head);//查询病人信息的函数；
+void chaj(struct keshi_node* head);//查询就诊记录信息的函数；
+void chax(struct keshi_node* head);//按姓名查询的函数；
+void chaz(struct keshi_node* head);//按组合查询函数；
+void shuju(struct keshi_node* head);//数据统计的菜单及选择的函数；
+void shuk(struct keshi_node* head);//统计科室的就诊人数的函数；
+void shub(struct keshi_node* head);//统计病人的就诊次数的函数；
+void luru(struct keshi_node* head);//信息录入的函数；
+void xiugai(struct keshi_node* head);//修改信息的菜单及选择的函数；
+void xiub(struct keshi_node* head);//修改病人信息的函数；
+void xiuj(struct keshi_node* head);//修改就诊记录的函数；
+void shanchu(struct keshi_node* head);//删除信息的菜单及选择的函数；
+void shanj(struct keshi_node* head);//删除就诊信息的函数；
+void xieru(struct keshi_node* head);//写入信息的函数；
+int main() {
+	struct keshi_node* head = NULL;
+	head = duqu();
+	menu(head);
+	return 0;
+}
+void menu(struct keshi_node* head) {
+	printf("1.基本就诊记录.\n");
+	printf("2.信息查询.\n");
+	printf("3.数据统计.\n");
+	printf("4.退出.\n");
+	xuanzhe(head);
+}
+void xuanzhe(struct keshi_node* head) {
+	int flag = 1, choice, c = 0;
+	printf("请输入您要选着内容的序号：\n");
+	scanf("%d", &choice);
+	while (flag) {
+		if (c != 0 && c != 3) {
+			printf("输入错误\n");
+			printf("请重新输入您要选着内容的序号！\n");
+
+			scanf("%d", &choice);
+		}
+		if (c == 3)break;
+		switch (choice) {
+		case 1:system("cls"); jiben(head); flag = 0; break;
+		case 2:system("cls"); chaxun(head); flag = 0; break;
+		case 3:system("cls"); shuju(head); flag = 0; break;
+		case 4:system("cls"); printf("再见！\n"); flag = 0; break;
+		default:c++; break;
+		}
+	}
+}
+void jiben(struct keshi_node* head) {
+	printf("1.录入.\n");
+	printf("2.修改.\n");
+	printf("3.删除.\n");
+	printf("4.返回上一页菜单.\n");
+	int flag1 = 1, choice1, c1 = 0;
+	printf("请输入选项.\n");
+	scanf("%d", &choice1);
+	while (flag1) {
+		if (c1 != 0 && c1 != 3) {
+			printf("请重新输入选项.\n");
+			scanf("%d", &choice1);
+		}
+		if (c1 == 3)break;
+		switch (choice1) {
+		case 1:system("cls"); luru(head); flag1 = 0; break;
+		case 2:system("cls"); xiugai(head); flag1 = 0; break;
+		case 3:system("cls"); shanchu(head); flag1 = 0; break;
+		case 4:system("cls"); menu(head); flag1 = 0; break;
+		default:c1++; break;
+		}
+	}
+}
+void luru(struct keshi_node* head) {
+	int flag = 1, flag1 = 1, c = 0, flag2 = 1;
+	struct keshi_node* p;
+	struct bingren_node* t,*t1;
+	struct jiuzhen_node* r, * r1;
+	while (flag1) {
+		printf("请输入病人信息：病人编码、名字、电话号码、科室编码、城市、街区及门牌。\n");
+		t = (struct bingren_node*)malloc(sizeof(struct bingren_node));
+		scanf("%d %s %lf %d %s %s %s", &t->bnum, t->bname, &t->bdian, &t->knum, t->city, t->street, t->code);
+		printf("请输入就诊信息：病人编码、名字、科室编码、日期、症状、序号。\n");
+		r = (struct jiuzhen_node*)malloc(sizeof(struct jiuzhen_node));
+		scanf("%d %s %d %s %s %s", &r->bnum, r->bname, &r->knum, r->shijian, r->zg, r->as);
+		for (p = head; p; p = p->next) {
+			if (t->knum == p->knum) {
+				flag1 = 0;
+				for(t1 = p->nextbingren;t1->next;t1=t1->next){
+					if (t->bnum == t1->bnum) {
+						for(r1 = t1->nextjiuzhen;r1->next;r1=r1->next){
+							if (r1->as == r->as) { flag2 = 0; break; }
+						}
+						if (r1->next == NULL) {
+							r1->next = r;
+							r->next = NULL;
+							flag = 0;
+							break;
+						}
+						else {
+							break;
+						}
+					}
+				}
+				if (flag == 0) {
+					break;
+				}
+				if (flag2 == 0) {
+					flag1 = 1; break;
+				}
+				t1->next = t;
+				t->next = NULL;
+				t->nextjiuzhen = r;
+				r->next = NULL;
+				break;
+			}
+		}
+		if (flag1 == 1) {
+			c++;
+			system("cls");
+			printf("输入错误，请重新输入。\n");
+		}
+		if (c == 3) {
+			printf("录入失败。\n");
+			break;
+		}
+	}
+	if (c < 3) {
+		printf("录入成功。\n");
+	}
+	xieru(head);
+}
+void xiugai(struct keshi_node* head) {
+	int flag = 1, choice, c = 0;
+	while (flag) {
+		printf("1.修改病人。\n");
+		printf("2.修改就诊记录。\n");
+		printf("3.结束。\n");
+		scanf("%d", &choice);
+		switch (choice) {
+		case 1:system("cls"); xiub(head); flag = 0; break;
+		case 2:system("cls"); xiuj(head); flag = 0; break;
+		case 3:system("cls"); printf("结束。\n"); flag = 0; break;
+		default:c++; printf("请重新输入。\n"); break;
+		}
+		if (c == 3) {
+			printf("输入失败。\n"); break;
+		}
+	}
+}
+void xiub(struct keshi_node* head) {
+	int flag = 1, knum, bnum, c = 0;
+	double bdian;
+	char city[10],street[10], code[100];
+	struct keshi_node* p;
+	struct bingren_node* t;
+	while (flag) {
+		printf("请输入科室编码和病人编码。\n");
+		scanf("%d %d", &knum, &bnum);
+		for (p = head; p; p = p->next) {
+			printf("%d\n", p->knum);
+			if (p->knum == knum) {
+				for (t = p->nextbingren; t; t = t->next) {
+					printf("%d\n", t->bnum);
+					if (t->bnum == bnum) {
+						system("cls");
+						printf("请输入修改内容电话号码、城市、街区及门牌。\n");
+						scanf("%lf %s %s %s", &bdian, city, street, code);
+						t->bdian = bdian;
+						strcpy(t->city, city);
+						strcpy(t->street, street);
+						strcpy(t->code, code);
+						flag = 0;
+						break;
+					}
+				}
+				break;
+			}
+		}
+		if (flag == 0) {
+			break;
+		}
+		else {
+			c++; printf("错误，请重新输入。\n"); break;
+		}
+		if (c == 3) {
+			break;
+		}
+	}
+	if (c < 3&&flag==0) {
+		system("cls"); printf("修改成功。\n");
+	}
+	else {
+		system("cls"); printf("修改失败。\n");
+	}
+	xieru(head);
+}
+void xiuj(struct keshi_node* head) {
+	int flag = 1, knum, bnum, c = 0;
+	char zg[100], shijian[20], a[100];
+	struct keshi_node* p;
+	struct bingren_node* t;
+	struct jiuzhen_node* r;
+	while (flag) {
+		printf("请输入科室编码、病人编码及序号：\n");
+		scanf("%d %d %s", &knum, &bnum,a);
+		for (p = head; p; p = p->next) {
+			if (p->knum == knum) {
+				for (t = p->nextbingren; t; t = t->next) {
+					if (t->bnum == bnum) {
+						for (r = t->nextjiuzhen; r; r = r->next) {
+							if (strcmp(r->as,a)==0) {
+								system("cls");
+								printf("请输入修改内容时间和症状：\n");
+								scanf("%s %s", shijian, zg);
+								strcpy(r->shijian,shijian);
+								strcpy(r->zg, zg);
+								flag = 0;
+								break;
+							}
+						}
+						break;
+					}
+				}
+				if (flag == 1) {
+					c++;
+					if (c == 3) {
+						break;
+					}
+					else {
+						printf("错误，请重新输入。\n"); break;
+					}
+				}
+				else {
+					break;
+				}
+			}
+		}
+		if (c == 3) {
+			printf("修改失败。\n"); break;
+		}
+	}
+	if (c < 3) {
+		printf("修改成功。\n");
+	}
+	xieru(head);
+}
+void shanchu(struct keshi_node* head) {
+	int flag = 1, choice, c = 0;
+	while (flag) {
+		printf("1.删除就诊记录。\n");
+		printf("2.结束。\n");
+		scanf("%d", &choice);
+		switch (choice) {
+		case 1:system("cls"); shanj(head); flag = 0; break;
+		case 2:system("cls"); printf("结束。\n"); flag = 0; break;
+		default:c++; printf("请重新输入。\n"); break;
+		}
+		if (c == 3) {
+			printf("输入失败。\n"); break;
+		}
+	}
+}
+void shanj(struct keshi_node* head) {
+	int flag = 1, knum, bnum, d = 0;
+	char a[100];
+	struct keshi_node* p;
+	struct bingren_node* t;
+	struct jiuzhen_node* r, * r1;
+	while (flag) {
+		printf("请输入要删除的科室编码、病人编码及就诊记录序号。\n");
+		scanf("%d %d %s", &knum, &bnum, a);
+		for (p = head; p; p = p->next) {
+			if (p->knum == knum) {
+				for (t = p->nextbingren; t; t = t->next) {
+					if (t->bnum == bnum) {
+						if (t->nextjiuzhen != NULL && strcmp(t->nextjiuzhen->as, a) == 0) {
+							r1 = t->nextjiuzhen;
+							t->nextjiuzhen = r1->next;
+							free(r1);
+							flag = 0; printf("删除成功。\n");
+							break;
+						 }
+						if (t->nextjiuzhen == NULL) {
+							break;
+						}
+						r = t->nextjiuzhen;
+						r1 = r->next;
+						while (r1 != NULL) {
+							if (strcmp(r1->as, a) == 0) {
+								r->next = r1->next;
+								free(r1);
+								flag = 0; printf("删除成功。\n");
+								break;
+							}
+							else {
+								r = r1;
+								r1 = r->next;
+							}
+						}
+						break;
+					}
+				}
+				break;
+			}
+		}
+		if (flag == 1) {
+			d++;
+			if (d == 3) {
+				printf("删除失败。\n"); break;
+			}
+			else {
+				printf("输入错误，请重新输入。\n");
+			}
+		}
+	}
+	xieru(head);
+}
+void chaxun(struct keshi_node* head) {
+	int flag = 1, choice, c = 0;
+	while (flag) {
+		printf("*****************************\n");
+		printf("1.查询科室信息。\n");
+		printf("2.查询病人信息。\n");
+		printf("3.查询就诊记录信息。\n");
+		printf("4.结束。\n");
+		printf("*****************************\n");
+		printf("请输入要查询内容的序号：\n");
+		scanf("%d", &choice);
+		switch (choice) {
+		case 1:system("cls"); chak(head); flag = 0; break;
+		case 2:system("cls"); chab(head); flag = 0; break;
+		case 3:system("cls"); chaj(head); flag = 0; break;
+		case 4:system("cls"); printf("结束，再见！\n"); flag = 0; break;
+		default:c++; if (c != 4) { printf("输入错误，请重新输入。\n"); } break;
+		}
+		if (c == 4) {
+			system("cls"); printf("查询失败，结束。\n"); break;
+		}
+	}
+}
+void chak(struct keshi_node* head) {
+	int flag = 1, knum, c = 0;
+	struct keshi_node* p;
+	while (flag) {
+		printf("请输入科室编码：\n");
+		scanf("%d", &knum);
+		for (p = head; p; p = p->next) {
+			if (p->knum == knum) {
+				printf("%d %s %ld %s %s %s %s\n", p->knum, p->kname, p->kdian, p->city, p->yiyuan, p->lou, p->khao);
+				flag = 0;
+				break;
+			}
+		}
+		if (flag == 1) {
+			c++;
+			if (c == 3) {
+				system("cls"); flag = 0; printf("查询失败。\n");
+			}
+			else {
+				printf("输入错误，请重新输入。\n");
+			}
+		}
+	}
+	chaxun(head);
+}
+void chab(struct keshi_node* head) {
+	int flag = 1, knum, bnum, c = 0;
+	struct keshi_node* p;
+	struct bingren_node* t;
+	while (flag) {
+		printf("请输入要查询的病人编码：\n");
+		scanf("%d",&bnum);
+		for (p = head; p; p = p->next) {
+				for (t = p->nextbingren; t; t = t->next) {
+					if (t->bnum == bnum) {
+						printf("%d %s %.0lf %d %s %s %s\n", t->bnum, t->bname, t->bdian, t->knum, t->city, t->street, t->code);
+						flag = 0;
+						break;
+					}
+				}
+				if (flag == 0) {
+					break;
+				}
+		}
+		if (flag == 1) {
+			c++;
+			if (c == 3) {
+				system("cls"); flag = 0; printf("查询失败。\n");
+			}
+			else {
+				printf("输入错误，请重新输入。\n");
+			}
+		}
+	}
+	chaxun(head);
+}
+void chaj(struct keshi_node* head) {
+	int flag = 1, choice, op = 0;
+	while (flag) {
+		printf("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY\n");
+		printf("1.按姓名查询。\n");
+		printf("2.按科室编码、病人编码及就诊日期组合查询。\n");
+		printf("3.结束。\n");
+		printf("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY\n");
+		printf("请输入序号：\n");
+		scanf("%d", &choice);
+		switch (choice) {
+		case 1:system("cls"); chax(head); break;
+		case 2:system("cls"); chaz(head); break;
+		case 3:system("cls"); printf("结束。\n"); flag = 0; break;
+		default:op++; if (op == 3) { flag = 0; printf("查询失败。\n"); }
+			          else { printf("序号错误。\n"); }
+			          break;
+		}
+	}
+}
+void chax(struct keshi_node* head) {
+	int flag = 1, choice, c = 0;
+	char bname[10];
+	struct keshi_node* p;
+	struct bingren_node* t;
+	struct jiuzhen_node* r;
+	while (flag) {
+		printf("请输入病人姓名：\n");
+		scanf("%s", &bname);
+		for (p = head; p&&flag; p = p->next) {
+			for (t = p->nextbingren; t&&flag; t = t->next) {
+				if (strcmp(t->bname, bname) == 0) {
+					for (r = t->nextjiuzhen; r; r = r->next) {
+						printf("%d %s %d %s %s %s\n", r->bnum, r->bname, r->knum, r->shijian, r->zg, r->as);	
+					}
+					flag = 0;
+					break;
+				}
+			}
+		}
+		if (flag == 1) { 
+			c++; 
+			if (c == 3) { 
+				flag = 0; 
+				printf("查询失败。\n"); 
+			} 
+			else { 
+				printf("无此人。\n"); 
+			} 
+		}
+	}
+}
+void chaz(struct keshi_node* head) {
+	int flag = 1, choice, knum, bnum, d = 0;
+	char shijian[20];
+	struct keshi_node* p;
+	struct bingren_node* t;
+	struct jiuzhen_node* r;
+	while (flag) {
+		printf("请输入科室编码、病人编码及就诊日期：\n");
+		scanf("%d %d %s", &knum, &bnum, shijian);
+		for (p = head; p; p = p->next) {
+			if (p->knum == knum) {
+				for (t = p->nextbingren; t; t = t->next) {
+					if (t->bnum == bnum) {
+						for (r = t->nextjiuzhen; r; r = r->next) {
+							if (strcmp(r->shijian, shijian) == 0) {
+								printf("%d %s %d %s %s %s\n", r->bnum, r->bname, r->knum, r->shijian, r->zg, r->as);
+								flag = 0;
+								break;
+							}
+						}
+						break;
+					}
+				}
+				break;
+			}
+		}if (flag == 1) { 
+			d++; 
+			if (d == 3) { 
+				flag = 0; printf("查询失败。\n");
+			} 
+			else { 
+				printf("输入错误。\n");
+			} 
+		}
+	}
+}
+void shuju(struct keshi_node* head) {
+	int flag = 1, choice, c = 0;
+	struct keshi_node* p;
+	struct bingren_node* t;
+	struct jiuzhen_node* r;
+	while (flag) {
+		printf("1.科室的就诊人数。\n");
+		printf("2.病人的就诊次数。\n");
+		printf("3.结束。\n");
+		printf("请输入序号：\n");
+		scanf("%d", &choice);
+		switch (choice) {
+		case 1:system("cls"); shuk(head); flag = 0; break;
+		case 2:system("cls"); shub(head); flag = 0; break;
+		case 3:system("cls"); printf("结束。\n"); flag = 0; break;
+		default:c++; if (c != 3) { printf("输入错误。\n"); }break;
+		}
+		if (c == 3) {
+			break;
+		}
+	}
+}
+void shuk(struct keshi_node* head) {
+	int flag = 1, knum, c = 0, d = 0;
+	struct keshi_node* p;
+	struct bingren_node* t;
+	while (flag) {
+		printf("请输入科室编码：\n");
+		scanf("%d", &knum);
+		for (p = head; p; p = p->next) {
+			if (p->knum == knum) {
+				for (t = p->nextbingren; t; t = t->next) {
+					c++;
+				}
+				printf("%d个\n", c);
+				flag = 0;
+				break;
+			}
+		}
+		if (flag == 1) {
+			d++; if (d == 3) {
+				printf("输入失败。\n"); flag = 0;
+			}
+			else {
+				printf("重新输入。\n");
+			}
+		}
+	}
+	shuju(head);
+}
+void shub(struct keshi_node* head) {
+	int flag = 1, bnum, c = 0, d = 0;
+	struct keshi_node* p;
+	struct bingren_node* t;
+	struct jiuzhen_node* r;
+	while (flag) {
+		printf("请输入病人编码：\n");
+		scanf("%d", &bnum);
+		for (p = head; p&&flag; p = p->next) {
+			for (t = p->nextbingren; t; t = t->next) {
+				if(t->bnum==bnum){
+					for (r = t->nextjiuzhen; r; r = r->next) {
+						c++;
+					}
+					flag = 0;
+					break;
+			    }
+			}
+		}
+		if (flag == 1) {
+			d++; if (d == 3) {
+				printf("输入失败。\n"); flag = 0;
+			}
+			else {
+				printf("重新输入。\n");
+			}
+		}
+	}
+	if (d != 3) {
+		printf("%d次\n", c);
+	}
+	shuju(head);
+}
+void xieru(struct keshi_node* head) {
+	struct keshi_node* p;
+	struct bingren_node* t;
+	struct jiuzhen_node* r;
+	FILE* fp, * fp1;
+	fp = fopen("bingren_node.txt", "w");
+	for (p = head; p; p = p->next) {
+		for (t = p->nextbingren; t; t = t->next) {
+			fprintf(fp, "%d %s %.0f %d %s %s %s\n", t->bnum, t->bname, t->bdian, t->knum, t->city, t->street, t->code);
+		}
+	}
+	fprintf(fp, "-1\n");
+	fclose(fp);
+	fp1 = fopen("jiuzhen_node.txt", "w");
+	for (p = head; p; p = p->next) {
+		for (t = p->nextbingren; t; t = t->next) {
+			for (r = t->nextjiuzhen; r; r = r->next) {
+				fprintf(fp1, "%d %s %d %s %s %s\n", r->bnum, r->bname, r->knum, r->shijian, r->zg, r->as);
+			}
+		}
+	}
+	fprintf(fp1, "-1\n");
+	fclose(fp1);
+}
