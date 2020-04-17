@@ -1,0 +1,399 @@
+#include <stdio.h>
+#include <malloc.h>
+#include <string.h>
+#define MaxSize 11
+#define N 10
+typedef char ElemType;
+typedef struct   // 顺序循环队列结点定义
+{
+	ElemType *name[MaxSize];   //小孩姓名
+	int front,rear;		//队首和队尾指针
+} SqQueue;
+void InitQueue(SqQueue *&q);   //初始化队列；
+void DestroyQueue(SqQueue *&q);  //销毁队列；
+bool QueueEmpty(SqQueue *q);  //判定队列为空时返回true; 否则返回false;
+bool enQueue(SqQueue *&q,ElemType *e);  // e 入队；成功入队返回true; 否则返回false;
+bool deQueue(SqQueue *&q,ElemType *&e);  //出队，返回出队元素e，且成功出队返回true,否则返回false;
+int main()
+{
+	ElemType *e;
+	int n,i;
+	SqQueue *q;
+	InitQueue(q);	
+	scanf("%d",&n);
+	while(1)
+	{
+		char *name=(char *)malloc(sizeof(char)*N);
+		scanf("%s",name);
+		if( (strcmp("-1",name)==0)||!enQueue(q,name))
+			break;
+	}
+	i=n-1;
+	while(!QueueEmpty(q))
+	{
+		deQueue(q,e);
+		if(i-->0) 
+			enQueue(q,e);
+		else
+		{
+			printf("%s\n",e);
+			i=n-1;
+			free(e);			
+		}		
+	}
+	DestroyQueue(q);
+}
+void InitQueue(SqQueue *&q)
+{
+	q = (SqQueue *)malloc(sizeof(SqQueue));
+	q->front = q->rear = 0;
+}
+void DestroyQueue(SqQueue *&q)
+{
+	free(q);
+}
+bool QueueEmpty(SqQueue *q)
+{
+	return(q->front == q->rear);
+}
+bool enQueue(SqQueue *&q, ElemType *e)
+{
+	if ((q->rear+1)%MaxSize == q->front)
+	{
+		return false;
+	}
+	q->name[q->rear] = e;
+	q->rear=(q->rear+1)%MaxSize;
+	
+	return true;
+}
+bool deQueue(SqQueue *&q, ElemType *&e)
+{
+	if (q->front==q->rear)
+	{
+		return false;
+	}
+	e = q->name[q->front];
+	q->front = (q->front + 1) % MaxSize;
+	
+	return true;
+}
+//小孩报数（顺序循环队列版）
+
+
+
+
+
+#include <stdio.h>
+#include<malloc.h>
+#define OK 1
+#define ERROR 0
+typedef int Status;
+typedef int ElemType; 
+typedef struct LNode
+{
+    ElemType data;
+	struct LNode * next;
+}LNode,*LinkList;
+
+typedef struct
+ {
+   LinkList front,rear; /* 队头、队尾指针 */
+ }LinkQueue;
+ /* 带头结点的链队列的基本操作 */
+Status QueueInsert(LinkQueue *Q, ElemType e)
+{
+	LinkList p;
+	p = (LinkList)malloc(sizeof(LinkList));
+	if (p == NULL)
+	{
+		return ERROR;
+	}
+	p->data = e;
+	p->next = NULL;
+	Q->rear->next = p;
+	Q->rear = p;
+	return OK;
+}
+Status QueueDelete(LinkQueue *Q, ElemType *e)
+{
+	LNode *p;
+	p = Q->front->next;
+	if (Q->front == Q->rear)
+	{
+		*e = -1;
+		return ERROR;
+	}
+	Q->front->next = p->next;
+	if (Q->rear->next =NULL )
+	{
+		Q->rear = Q->front;
+	}
+	*e = p->data;
+	free(p);
+	return OK;
+}
+ Status InitQueue(LinkQueue *Q)
+ { /* 构造一个空队列Q */
+	 LinkList p;
+   p=(LNode*)malloc(sizeof(LNode)); 
+   p->next=NULL;
+   (*Q).rear=(*Q).front=p;
+   return OK;
+ }
+Status List(LinkList L)
+{
+	LinkList p;
+	if(!L) return ERROR;
+	p=L->next;
+	
+	while(p)
+	{
+		printf(" %d",p->data);
+		p=p->next;
+	}
+	printf("\n");
+    return OK;
+}
+int QueueLenth(LinkQueue Q)
+{
+	int n=0;
+	LinkList p;
+	if(Q.rear==Q.front)
+		return 0;
+	p=Q.front->next;
+	while(p)
+	{
+		n++;
+		p=p->next;
+	}
+	return n;
+}
+
+int main()
+{
+	int x;
+	LinkQueue Q;
+	InitQueue(&Q);
+	QueueInsert(&Q,1);QueueInsert(&Q,2);QueueInsert(&Q,3);
+	List(Q.front );
+	QueueDelete( &Q,&x);
+	printf(" %d %d\n",x,QueueLenth(Q));
+	QueueDelete(&Q,&x);QueueDelete(&Q,&x);
+	printf(" %d %d\n",x,QueueLenth(Q));
+	return 0;
+}
+// 带头结点的链队列的基本操作
+
+
+
+
+
+
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#define ERROR -1
+typedef int ElementType;
+typedef enum { addq, delq, end } Operation;
+typedef enum { false, true } bool;
+typedef int Position;
+typedef struct QNode *PtrToQNode;
+struct QNode {
+    ElementType *Data;  /* 存储元素的数组   */
+    Position Front;     /* 队列的头、尾指针 */
+    int Count;          /* 队列中元素个数   */
+    int MaxSize;        /* 队列最大容量     */
+};
+typedef PtrToQNode Queue; 
+
+Queue CreateQueue( int MaxSize )
+{
+    Queue Q = (Queue)malloc(sizeof(struct QNode));
+    Q->Data = (ElementType *)malloc(MaxSize * sizeof(ElementType));
+    Q->Front = 0;
+    Q->Count = 0;
+    Q->MaxSize = MaxSize;
+    return Q;
+}
+
+bool AddQ( Queue Q, ElementType X );
+ElementType DeleteQ( Queue Q );
+
+Operation GetOp();  /* 裁判实现，细节不表 */
+
+int main()
+{
+    ElementType X;
+    Queue Q;
+    int N, done = 0;
+
+    scanf("%d", &N);
+    Q = CreateQueue(N);
+    while ( !done ) {
+        switch( GetOp() ) {
+        case addq: 
+            scanf("%d", &X);
+            AddQ(Q, X);
+            break;
+        case delq:
+            X = DeleteQ(Q);
+            if ( X!=ERROR ) printf("%d is out\n", X);
+            break;
+        case end:
+            while (Q->Count) printf("%d ", DeleteQ(Q));
+            done = 1;
+            break;
+        }
+    }
+    return 0;
+}
+bool AddQ(Queue Q, ElementType X)
+{
+	if (Q->Count == Q->MaxSize)
+	{
+		printf("Queue Full\n");
+		return false;
+	}
+	Q->Count++;
+	Q->Data[(Q->Front + Q->Count) % Q->MaxSize] = X;
+	return true;
+}
+ElementType DeleteQ(Queue Q)
+{
+	if (Q->Count == 0)
+	{
+		printf("Queue Empty\n");
+		return ERROR;
+	}
+	Q->Count--;
+	Q->Front = (Q->Front+1) % Q->MaxSize;
+	return Q->Data[Q->Front];
+}
+// 另类循环队列 
+
+
+
+
+
+
+
+
+
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#define ERROR -1
+typedef int ElementType;
+typedef enum { push, pop, inject, eject, end } Operation;
+typedef enum { false, true } bool;
+typedef int Position;
+typedef struct QNode *PtrToQNode;
+struct QNode {
+    ElementType *Data;      /* 存储元素的数组   */
+    Position Front, Rear;   /* 队列的头、尾指针 */
+    int MaxSize;            /* 队列最大容量     */
+};
+typedef PtrToQNode Deque; 
+
+Deque CreateDeque( int MaxSize )
+{   /* 注意：为区分空队列和满队列，需要多开辟一个空间 */
+    Deque D = (Deque)malloc(sizeof(struct QNode));
+    MaxSize++;
+    D->Data = (ElementType *)malloc(MaxSize * sizeof(ElementType));
+    D->Front = D->Rear = 0;
+    D->MaxSize = MaxSize;
+    return D;
+}
+
+bool Push( ElementType X, Deque D );
+ElementType Pop( Deque D );
+bool Inject( ElementType X, Deque D );
+ElementType Eject( Deque D );
+
+Operation GetOp();          /* 裁判实现，细节不表 */
+void PrintDeque( Deque D ); /* 裁判实现，细节不表 */
+
+int main()
+{
+    ElementType X;
+    Deque D;
+    int N, done = 0;
+
+    scanf("%d", &N);
+    D = CreateDeque(N);
+    while (!done) {
+        switch(GetOp()) {
+        case push: 
+            scanf("%d", &X);
+            if (!Push(X, D)) printf("Deque is Full!\n");
+            break;
+        case pop:
+            X = Pop(D);
+            if ( X==ERROR ) printf("Deque is Empty!\n");
+            else printf("%d is out\n", X);
+            break;
+        case inject: 
+            scanf("%d", &X);
+            if (!Inject(X, D)) printf("Deque is Full!\n");
+            break;
+        case eject:
+            X = Eject(D);
+            if ( X==ERROR ) printf("Deque is Empty!\n");
+            else printf("%d is out\n", X);
+            break;
+        case end:
+            PrintDeque(D);
+            done = 1;
+            break;
+        }
+    }
+    return 0;
+}
+bool Push(ElementType X, Deque D)
+{
+	if ((D->Rear + 1) % D->MaxSize == D->Front)
+		return false;
+	
+	D->Front = ((D->Front - 1 )+ D->MaxSize) % D->MaxSize;
+	D->Data[D->Front] = X;
+	return true;
+}
+ElementType Pop(Deque D)
+{
+	if (D->Rear == D->Front)
+	{
+		return ERROR;
+	}
+	ElementType d = D->Data[D->Front];
+	D->Front = (D->Front + 1) % D->MaxSize;
+	return d;
+}
+bool Inject(ElementType X, Deque D)
+{
+	if ((D->Rear + 1) % D->MaxSize == D->Front)
+	{
+		return false;
+	}
+	D->Data[D->Rear] = X;
+	D->Rear = (D->Rear + 1) % D->MaxSize;
+	return true;
+}
+ElementType Eject(Deque D)
+{
+	if (D->Front==D->Rear)
+	{
+		return ERROR;
+	}
+	if (D->Rear == 0)
+	{
+		D->Rear = D->MaxSize;
+	}
+	D->Rear--;
+	ElementType n = D->Data[D->Rear];
+	return n;
+
+}
+//双端队列
