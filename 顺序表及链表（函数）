@@ -1,0 +1,523 @@
+bool ListInsert(SqList *&L,int i,ElemType e)
+{
+    int j;
+    if(i<1||i>L->length+1){
+        return false;
+    }
+    for(j=L->length;j>=i-1;j--){
+        L->data[j+1]=L->data[j];
+    }
+    L->data[i-1]=e;
+    L->length++;
+    return true;
+}
+bool ListDelete(SqList *&L,int i,ElemType &e)
+{
+    int j;
+    if(i<1||i>L->length){
+        return false;
+    }
+    e=L->data[i-1];
+    for(j=i-1;j<L->length-1;j++){
+        L->data[j]=L->data[j+1]; 
+    }
+    L->length--;
+    return true;
+}
+bool ListDeleteElem(SqList *&L,ElemType e)
+{
+    int j,k=0;
+    for(j=0;j<L->length;j++){
+        if(L->data[j]!=e){
+            L->data[k]=L->data[j];
+            k++;
+        }
+    }
+    if(k==L->length)
+        return false;
+    L->length=k;
+    return true;
+}
+//顺序表基本操作 
+
+
+
+
+
+
+void InitList(LinkList *&L)
+{
+    L=(LinkList*)malloc(sizeof(LinkList));
+    L->next=NULL;
+}
+void DestroyList(LinkList *&L)
+{
+    LinkList*pre=L,*p=L->next;
+    while(p!=NULL){
+        free(pre);
+        pre=p;
+        p=pre->next;
+    }
+    free(pre);
+}
+void DispList(LinkList *L)
+{
+    LinkList*p=L->next;
+    while(p!=NULL){
+        printf("%c ",p->data);
+        p=p->next;
+    }
+    printf("\n");
+}
+bool ListInsert(LinkList *&L,int i,ElemType e)
+{
+    int j=0;
+    LinkList*p=L,*s;
+    while(j<i-1&&p!=NULL){
+        j++;
+        p=p->next;
+    }
+    if(p==NULL){
+        return false;
+    }
+    else{
+        s=(LinkList*)malloc(sizeof(LinkList));
+        s->data=e;
+        s->next=p->next;
+        p->next=s;
+        return true; 
+    }
+}
+bool ListDelete(LinkList *&L,int i,ElemType &e)
+{
+    int j=0;
+    LinkList*p=L,*q;
+    while(j<i-1&&p!=NULL){
+        j++;
+        p=p->next;
+    }
+    if(p==NULL||i<=0){
+        return false;
+    }
+    else{
+        q=p->next;
+        if(q==NULL){
+            return false;
+        }
+        e=q->data;
+        p->next=q->next;
+        free(q);
+        return true;
+    }
+}
+// 单链表基本操作
+
+
+
+
+
+
+
+
+void DispList(LinkList *L)
+{
+    LinkList*p=L->next;
+    while(p!=NULL){
+        printf("%c ",p->data);
+        p=p->next;
+    }
+    printf("\n");
+}
+void CreateListR(LinkList *&L,ElemType a[],int n)
+{
+    LinkList*s,*r;
+    int i;
+    L=(LinkList*)malloc(sizeof(LinkList));
+    r=L;
+    for(i=0;i<n;i++){
+        s=(LinkList*)malloc(sizeof(LinkList));
+        s->data=a[i];
+        r->next=s;
+        r=s;
+    }
+    r->next=NULL;
+}
+void DestroyList(LinkList *&L)
+{
+    LinkList*pre=L,*p=L->next;
+    while(p!=NULL){
+        free(pre);
+        pre=p;
+        p=pre->next;
+    }
+    free(pre);
+}
+void sort(LinkList *&L)// 具体实现函数
+{
+    LinkList *p,*pre,*q;
+    p=L->next->next;//p指向L的第二个数据元素
+    L->next->next=NULL;//构造只含一个数据节点的有序单链表
+    while(p!=NULL)
+    {
+        q=p->next;// q保存P节点的后继结点指针
+        pre=L;// 从有序单链表开始比较，pre指向插入节点的前驱节点
+        while(pre->next!=NULL&&pre->next->data<p->data)//在有序单链表中插入p所指节点的前驱节点（pre所指向）
+        {
+            pre=pre->next;//在pre所指节点之后插入P所指节点
+        }
+        p->next=pre->next;
+        pre->next=p;//扫描原单链表余下的节点
+        p=q;
+    }
+}
+void Union(LinkList *ha,LinkList *hb,LinkList *&hc)   //求两个集合的并
+{
+    LinkList *pa=ha->next,*pb=hb->next,*s,*tc;
+    hc=(LinkList *)malloc(sizeof(LinkList));
+    tc=hc;
+    while(pa!=NULL&&pb!=NULL)
+    {
+        if(pa->data < pb->data)
+        {
+            s=(LinkList *)malloc(sizeof(LinkList));
+            s->data=pa->data;
+            tc->next=s;
+            tc=s;
+            pa=pa->next;
+        }
+        else if(pa->data > pb->data)
+        {
+            s=(LinkList *)malloc(sizeof(LinkList));
+            s->data=pb->data;
+            tc->next=s;
+            tc=s;
+            pb=pb->next;
+        }
+        else
+        {
+            s=(LinkList *)malloc(sizeof(LinkList));
+            s->data=pa->data;
+            tc->next=s;
+            tc=s;
+            pa=pa->next;
+            pb=pb->next;
+        }
+    }
+    if(pb!=NULL)
+        pa=pb;
+    while(pa!=NULL)
+    {
+        s=(LinkList *)malloc(sizeof(LinkList));
+        s->data=pa->data;
+        tc->next=s;
+        tc=s;
+        pa=pa->next;
+    }
+    tc->next=NULL;
+}
+void InterSect(LinkList *ha,LinkList *hb,LinkList *&hc)//求两个集合的交
+{
+    LinkList *pa=ha->next,*pb,*s,*tc;
+    hc=(LinkList *)malloc(sizeof(LinkList));
+    tc=hc;
+    while(pa!=NULL)
+    {
+        pb=hb->next;
+        while(pb!=NULL&&pb->data < pa->data)
+            pb=pb->next;
+        if(pb!=NULL&&pb->data==pa->data)
+        {
+            s=(LinkList *)malloc(sizeof(LinkList));
+            s->data=pa->data;
+            tc->next=s;
+            tc=s;
+        }
+        pa=pa->next;
+    }
+    tc->next=NULL;
+}
+void Subs(LinkList *ha,LinkList *hb,LinkList *&hc)//求两个集合的差
+{
+    LinkList *pa=ha->next,*pb,*s,*tc;
+    hc=(LinkList *)malloc(sizeof(LinkList));
+    tc=hc;
+    while(pa!=NULL)
+    {
+        pb=hb->next;
+        while(pb!=NULL&&pb->data < pa->data)
+            pb=pb->next;
+        if(!(pb!=NULL&&pb->data==pa->data))
+        {
+            s=(LinkList *)malloc(sizeof(LinkList));
+            s->data=pa->data;
+            tc->next=s;
+            tc=s;
+        }
+        pa=pa->next;
+    }
+    tc->next=NULL;
+}
+//集合的基本运算（单链表）
+
+
+
+
+
+
+void DispList(DLinkNode *L)
+{
+    DLinkNode *p = new DLinkNode;
+        p = L->next;
+        while(p!=L&&p){
+            printf("%c ",p->data);
+            p = p->next;
+        }
+        printf("\n");
+}
+int Symm(DLinkNode *L)
+{
+    if(L->next==L) return -1;
+    DLinkNode *r=L->next;
+    DLinkNode *l=L->prior;
+    while(l!=r){
+        if(l->data==r->data){
+            r=r->next;
+            l=l->prior;
+        }
+        else return 0;
+    }
+        return 1;
+}
+// 判断链表结点对称
+
+
+
+
+
+
+
+void DispList(LinkList *L)
+{
+    LinkList *p;
+    p = L->next;
+    if(!p) printf("NULL");
+    while(p!=NULL){
+        printf("%c ",p->data);
+        p = p->next;
+    }
+    printf("\n");
+}
+bool ListDelete(LinkList *&L,int i,ElemType &e)
+{
+    int j=0;
+    LinkList*p=L,*q;
+    while(j<i-1&&p!=NULL){
+        j++;
+        p=p->next;
+    }
+    if(p==NULL||i<=0){
+        return false;
+    }
+    else{
+        q=p->next;
+        if(q==NULL){
+            return false;
+        }
+        e=q->data;
+        p->next=q->next;
+        free(q);
+        return true;
+    }
+}
+//单链表基本操作--删除结点I
+
+
+
+
+
+
+bool ListDelete(SqList *&L,int i,ElemType &e)
+{
+    int j;
+    if(i<1||i>L->length){
+        return false;
+    }
+    e=L->data[i-1];
+    for(j=i-1;j<L->length-1;j++){
+        L->data[j]=L->data[j+1]; 
+    }
+    L->length--;
+    return true;
+}
+bool ListDeleteElem(SqList *&L,ElemType e)
+{
+    int j,k=0;
+    for(j=0;j<L->length;j++){
+        if(L->data[j]!=e){
+            L->data[k]=L->data[j];
+            k++;
+        }
+    }
+    if(k==L->length)
+        return false;
+    L->length=k;
+    return true;
+}
+//顺序表--删除结点
+
+
+
+
+
+
+
+List Delete( List L, ElementType minD, ElementType maxD )
+{
+    int i,j;
+    for(i=0;i<=L->Last;i++){
+        if(L->Data[i]<=minD||L->Data[i]>=maxD){
+            L->Data[j]=L->Data[i];j++;
+        }
+    }
+    L->Last=j-1;
+    return L; 
+}
+//线性表元素的区间删除
+
+
+
+
+
+
+
+ElementType Find( List L, int m )
+{
+    List p=L->Next,q=L;
+    int i=0,j;
+    while(p){
+        p=p->Next;
+        i++;
+    }
+    if(m>i) return ERROR;
+    for(j=1;j<=i-m+1;j++){
+        q=q->Next;
+    }
+    return q->Data;
+}
+//求链表的倒数第m个元素
+
+
+
+
+
+
+int countcs( struct ListNode *head )
+{
+    int i=0;
+    while(head){
+        if(head->code[1]=='0'&&head->code[2]=='2'){
+            i++;
+        }
+        head=head->next;
+    }
+    return i;
+}
+// 统计专业人数
+
+
+
+
+
+
+
+void K_Reverse( List L, int K ) {
+    int cnt;
+    int len=0,i;
+    List p=L,r,s,t,q=p->Next,tmp;
+    while(q) {
+        q=q->Next;
+        len++;
+    }
+    if(!len||K>len||K<=1)return;
+    for(i=0; i<len/K; i++) {
+        cnt=0;
+        r=p->Next;
+        s=r->Next;
+        t=r;
+        while(cnt!=K-1) {//注意是K-1次
+            tmp=s->Next;
+            s->Next=r;
+            r=s;
+            s=tmp;
+            cnt++;
+        }
+        t->Next=s;
+        p->Next=r;
+        p=t;
+    }
+}
+//单链表分段逆转
+
+
+
+
+
+
+
+
+PtrToNode Suffix( List L1, List L2 )
+{
+	List P1,P2;
+	P1=L1->Next;
+	P2=L2->Next;
+	int len1=0,len2=0;
+	while(P1)//求链表1的长度 len1
+	{
+		len1++;
+		P1=P1->Next;
+	}
+	while(P2)//求链表2的长度 len2
+	{
+		len2++;
+		P2=P2->Next;
+	}
+	for(P1=L1;len1>len2;len1--)//若len1>len2,令p1指向链表中的第len1-len2+1个结点 
+	    P1=P1->Next;
+	for(P2=L2;len2>len1;len2--)//若len2>len1,令p2指向链表中的第len2-len1+1个结点  
+	    P2=P2->Next;
+	while(P1->Next!=P2->Next) 
+	{
+		/*将指针P1和p2同步向后移动，
+		直到P1和p2指向同一结点 */
+		P1=P1->Next;
+		P2=P2->Next;
+	}
+	return P1->Next; 
+}
+//共享后缀的链表 
+
+
+
+
+
+
+
+Position BinarySearch( List L, ElementType X )
+{
+    int left=0, right=L->Last;
+    int mid=(left+right)/2;
+    while(left<=right){
+        int mid=(left+right)/2;
+        if(L->Data[mid]==X){
+        return mid;
+        }
+        else if(L->Data[mid]<X){
+        left = mid +1;
+        }
+        else{
+        right = mid-1;
+        }
+    }
+    return NotFound;
+}
+//二分查找 
