@@ -1,0 +1,29 @@
+#include<stdio.h>
+int a[11];
+int b[11];
+void qp(int n,int ns)
+{
+    int i,k;
+    if(ns==n){
+        for(i=0;i<n;i++){
+            printf("%d",a[i]);
+        }
+        printf("\n");
+    }
+    for(k=1;k<=n;k++){
+        if(b[k]==0){
+            a[ns++]=k;
+            b[k]=1;
+            qp(n,ns);
+            ns--;
+            b[k]=0;
+        }
+    }
+}
+int main()
+{
+    int n;
+    scanf("%d",&n);
+    qp(n,0);
+    return 0;
+}
