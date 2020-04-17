@@ -1,0 +1,65 @@
+#include <stdio.h>
+double f（double n）
+{
+    if(n==0) return 1;
+    else return n*f(n-1);
+}
+int main()
+{
+    double n;
+    scanf("%lf",&n);
+    printf("%.0f",f(n));
+    return 0;
+}
+//求阶乘问题
+
+#include<stdio.h>
+double f(double a[], int n)
+{
+	if (n == 1)
+		return a[0];
+	else
+		return (a[n-1] + (n-1)*f(a, n - 1)) / n;
+}
+int main()
+{
+	double a[10],av = 0, j = 0;
+	int n, i;
+	scanf("%d", &n);
+	if (n > 10 || n < 1) {
+		printf("Invalid.");
+	}
+	else {
+		for (i = 0; i < n; i++) {
+			scanf("%lf", &a[i]);
+		}
+		av = f(a, n);
+		printf("%.2f\n", av);
+		for (i = 0; i < n; i++) {
+			if (a[i] > av) {
+				printf("%.0f ", a[i]);
+				j++;
+			}
+		}
+		if (j == 0) printf("\n");
+	}
+	return 0;
+}
+//输出所有大于平均值的数
+
+
+include<stdio.h>
+int f(int n) {
+	if (n == 0) return 1;
+	else return 1+f(n / 10);
+}
+int main()
+{
+	int n,t;
+	scanf("%d", &n);
+    if(n==0) t=2;
+	else t = f(n);
+	printf("%d",--t);
+	return 0;
+}
+// 统计一个整数的位数
